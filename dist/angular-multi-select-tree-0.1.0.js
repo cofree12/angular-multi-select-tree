@@ -278,14 +278,10 @@
           }
           return childNodes;
         }
-        function expandToLeaves(node, expand) {
-          node.isExpanded = expand;
-          for (var i = 0; i < node.children.length; i++) {
-            expandToLeaves(node.children[i], expand);
-          }
-        }
         function filterNode(node, filterKeyword) {
-          if (!node.children || !node.children.length) {
+          console.log(node);
+          node.isExpanded = true;
+          if (!node.children.length) {
             if (node.name.toLowerCase().indexOf(filterKeyword.toLowerCase()) !== -1) {
               node.isFiltered = false;
             } else {
@@ -328,7 +324,7 @@
   mainModule.controller('treeItemCtrl', [
     '$scope',
     function ($scope) {
-      $scope.item.isExpanded = false;
+      $scope.item.isExpanded = $scope.item.isExpanded || false;
       /**
      * Shows the expand option.
      *

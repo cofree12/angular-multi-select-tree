@@ -13,7 +13,7 @@
    */
   mainModule.controller('treeItemCtrl', ['$scope', function ($scope) {
 
-    $scope.item.isExpanded = false;
+    $scope.item.isExpanded = $scope.item.isExpanded || false;
 
     /**
      * Shows the expand option.
