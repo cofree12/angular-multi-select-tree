@@ -270,9 +270,7 @@
           }
 
           function filterNode(node, filterKeyword) {
-            console.log(node);
-            node.isExpanded = true;
-            
+
             if (!node.children.length) {
               if (node.name.toLowerCase().indexOf(filterKeyword.toLowerCase()) !== -1) {
                 node.isFiltered = false;
@@ -288,7 +286,7 @@
               isFiltered &= filterNode(node.children[i], filterKeyword);
             }
             node.isFiltered = isFiltered;
-            node.isExpanded = true;
+            node.isExpanded = !isFiltered && filterKeyword !== '';
             return isFiltered;
           }
 
@@ -297,7 +295,7 @@
               angular.forEach(scope.inputModel, function (item) {
                 var isFiltered = filterNode(item, scope.filterKeyword);
                 item.isFiltered = isFiltered;
-                item.isExpanded = true;
+                item.isExpanded = !isFiltered && filterKeyword !== '';
               });
             }
           });
