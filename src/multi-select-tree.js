@@ -156,7 +156,7 @@
      * @param item the item
      */
     $scope.canSelectItem = function (item) {
-      return $scope.callback({item: item, selectedItems: $scope.selectedItems});
+      return $scope.callback({ item: item, selectedItems: $scope.selectedItems });
     };
 
     /**
@@ -165,9 +165,9 @@
      *
      * @param $event the event object.
      */
-    $scope.switchCurrentView = function($event) {
+    $scope.switchCurrentView = function ($event) {
       $event.stopPropagation();
-      $scope.switchViewCallback({scopeObj:$scope});
+      $scope.switchViewCallback({ scopeObj: $scope });
     };
 
     /**
@@ -259,23 +259,50 @@
            */
           function getAllChildNodesFromNode(node, childNodes) {
             for (var i = 0; i < node.children.length; i++) {
-              childNodes.push(node.children[i]);
+              var current = node.children[i];
+              if (!current.children || !current.children.length) {
+                childNodes.push(current);
+              }
               // add the childNodes from the children if available
               getAllChildNodesFromNode(node.children[i], childNodes);
             }
             return childNodes;
           }
 
+          function expandToLeaves(node, expand) {
+            node.isExpanded = expand;
+            for (var i = 0; i < node.children.length; i++) {
+              expandToLeaves(node.children[i], expand);
+            }
+          }
+
+          function filterNode(node, filterKeyword) {
+
+            if (!node.children || !node.children.length) {
+              if (node.name.toLowerCase().indexOf(filterKeyword.toLowerCase()) !== -1) {
+                node.isFiltered = false;
+              }
+              else {
+                node.isFiltered = true;
+              }
+              return node.isFiltered;
+            }
+
+            var isFiltered = true;
+            for (var i = 0; i < node.children.length; i++) {
+              isFiltered &= filterNode(node.children[i], filterKeyword);
+            }
+            node.isFiltered = isFiltered;
+            node.isExpanded = !isFiltered && filterKeyword !== '';
+            return isFiltered;
+          }
+
           scope.$watch('filterKeyword', function () {
             if (scope.filterKeyword !== undefined) {
               angular.forEach(scope.inputModel, function (item) {
-                if (item.name.toLowerCase().indexOf(scope.filterKeyword.toLowerCase()) !== -1) {
-                  item.isFiltered = false;
-                } else if (!isChildrenFiltered(item, scope.filterKeyword)) {
-                  item.isFiltered = false;
-                } else {
-                  item.isFiltered = true;
-                }
+                var isFiltered = filterNode(item, scope.filterKeyword);
+                item.isFiltered = isFiltered;
+                item.isExpanded = !isFiltered && scope.filterKeyword !== '';
               });
             }
           });
