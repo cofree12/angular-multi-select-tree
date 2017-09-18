@@ -295,7 +295,7 @@
               angular.forEach(scope.inputModel, function (item) {
                 var isFiltered = filterNode(item, scope.filterKeyword);
                 item.isFiltered = isFiltered;
-                item.isExpanded = !isFiltered && filterKeyword !== '';
+                item.isExpanded = !isFiltered && scope.filterKeyword !== '';
               });
             }
           });
