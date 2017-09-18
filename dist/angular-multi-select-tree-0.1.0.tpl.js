@@ -98,8 +98,6 @@ angular.module('multi-select-tree').run(['$templateCache', function($templateCac
     "\n" +
     "                   on-active-item=\"activeSubItem(item, $event)\"></tree-item>\r" +
     "\n" +
-    "                   {{child|json}}\r" +
-    "\n" +
     "    </ul>\r" +
     "\n" +
     "</li>\r" +
