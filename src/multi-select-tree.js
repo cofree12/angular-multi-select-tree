@@ -293,7 +293,7 @@
               isFiltered &= filterNode(node.children[i], filterKeyword);
             }
             node.isFiltered = isFiltered;
-            node.isExpanded = !isFiltered && filterKeyword !== '';
+            node.isExpanded = true;
             return isFiltered;
           }
 
@@ -302,7 +302,7 @@
               angular.forEach(scope.inputModel, function (item) {
                 var isFiltered = filterNode(item, scope.filterKeyword);
                 item.isFiltered = isFiltered;
-                item.isExpanded = !isFiltered && scope.filterKeyword !== '';
+                item.isExpanded = true;
               });
             }
           });
