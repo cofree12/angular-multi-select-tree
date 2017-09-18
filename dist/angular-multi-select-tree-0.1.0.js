@@ -25,7 +25,7 @@
 /*global angular: false */
 (function () {
   'use strict';
-  angular.module('multi-select-tree', []);
+  angular.module('multi-select-tree', ['underscore']);
 }());
 /*jshint indent: 2 */
 /*global angular: false */
@@ -221,93 +221,96 @@
   /**
    * sortableItem directive.
    */
-  mainModule.directive('multiSelectTree', function () {
-    return {
-      restrict: 'E',
-      templateUrl: 'src/multi-select-tree.tpl.html',
-      scope: {
-        inputModel: '=',
-        outputModel: '=?',
-        multiSelect: '=?',
-        switchView: '=?',
-        switchViewLabel: '@',
-        switchViewCallback: '&',
-        selectOnlyLeafs: '=?',
-        callback: '&',
-        defaultLabel: '@'
-      },
-      link: function (scope, element, attrs) {
-        if (attrs.callback) {
-          scope.useCallback = true;
-        }
-        // watch for changes in input model as a whole
-        // this on updates the multi-select when a user load a whole new input-model.
-        scope.$watch('inputModel', function (newVal) {
-          if (newVal) {
-            scope.refreshSelectedItems();
-            scope.refreshOutputModel();
+  mainModule.directive('multiSelectTree', [
+    '_',
+    function (_) {
+      return {
+        restrict: 'E',
+        templateUrl: 'src/multi-select-tree.tpl.html',
+        scope: {
+          inputModel: '=',
+          outputModel: '=?',
+          multiSelect: '=?',
+          switchView: '=?',
+          switchViewLabel: '@',
+          switchViewCallback: '&',
+          selectOnlyLeafs: '=?',
+          callback: '&',
+          defaultLabel: '@'
+        },
+        link: function (scope, element, attrs) {
+          if (attrs.callback) {
+            scope.useCallback = true;
           }
-        });
-        /**
+          // watch for changes in input model as a whole
+          // this on updates the multi-select when a user load a whole new input-model.
+          scope.$watch('inputModel', function (newVal) {
+            if (newVal) {
+              scope.refreshSelectedItems();
+              scope.refreshOutputModel();
+            }
+          });
+          /**
            * Checks whether any of children match the keyword.
            *
            * @param item the parent item
            * @param keyword the filter keyword
            * @returns {boolean} false if matches.
            */
-        function isChildrenFiltered(item, keyword) {
-          var childNodes = getAllChildNodesFromNode(item, []);
-          for (var i = 0, len = childNodes.length; i < len; i++) {
-            if (childNodes[i].name.toLowerCase().indexOf(keyword.toLowerCase()) !== -1) {
-              return false;
+          function isChildrenFiltered(item, keyword) {
+            var childNodes = getAllChildNodesFromNode(item, []);
+            for (var i = 0, len = childNodes.length; i < len; i++) {
+              if (childNodes[i].name.toLowerCase().indexOf(keyword.toLowerCase()) !== -1) {
+                return false;
+              }
             }
+            return true;
           }
-          return true;
-        }
-        /**
+          /**
            * Return all childNodes of a given node (as Array of Nodes)
            */
-        function getAllChildNodesFromNode(node, childNodes) {
-          for (var i = 0; i < node.children.length; i++) {
-            var current = node.children[i];
-            if (!current.children || !current.children.length) {
-              childNodes.push(current);
+          function getAllChildNodesFromNode(node, childNodes) {
+            for (var i = 0; i < node.children.length; i++) {
+              var current = node.children[i];
+              if (!current.children || !current.children.length) {
+                childNodes.push(current);
+              }
+              // add the childNodes from the children if available
+              getAllChildNodesFromNode(node.children[i], childNodes);
             }
-            // add the childNodes from the children if available
-            getAllChildNodesFromNode(node.children[i], childNodes);
+            return childNodes;
           }
-          return childNodes;
-        }
-        function filterNode(node, filterKeyword) {
-          if (!node.children.length) {
-            if (node.name.toLowerCase().indexOf(filterKeyword.toLowerCase()) !== -1) {
-              node.isFiltered = false;
-            } else {
-              node.isFiltered = true;
+          function filterNode(node, filterKeyword) {
+            if (!node.children.length) {
+              if (node.name.toLowerCase().indexOf(filterKeyword.toLowerCase()) !== -1) {
+                node.isFiltered = false;
+              } else {
+                node.isFiltered = true;
+              }
+              return node.isFiltered;
             }
-            return node.isFiltered;
+            var isFiltered = true;
+            for (var i = 0; i < node.children.length; i++) {
+              isFiltered &= filterNode(node.children[i], filterKeyword);
+            }
+            node.isFiltered = isFiltered;
+            node.isExpanded = !isFiltered && filterKeyword !== '';
+            return isFiltered;
           }
-          var isFiltered = true;
-          for (var i = 0; i < node.children.length; i++) {
-            isFiltered &= filterNode(node.children[i], filterKeyword);
-          }
-          node.isFiltered = isFiltered;
-          node.isExpanded = !isFiltered && filterKeyword !== '';
-          return isFiltered;
-        }
-        scope.$watch('filterKeyword', function () {
-          if (scope.filterKeyword !== undefined) {
-            angular.forEach(scope.inputModel, function (item) {
-              var isFiltered = filterNode(item, scope.filterKeyword);
-              item.isFiltered = isFiltered;
-              item.isExpanded = !isFiltered && scope.filterKeyword !== '';
-            });
-          }
-        });
-      },
-      controller: 'multiSelectTreeCtrl'
-    };
-  });
+          scope.$watch('filterKeyword', _.throttle(function () {
+            if (scope.filterKeyword !== undefined) {
+              angular.forEach(scope.inputModel, function (item) {
+                var isFiltered = filterNode(item, scope.filterKeyword);
+                item.isFiltered = isFiltered;
+                item.isExpanded = !isFiltered && scope.filterKeyword !== '';
+              });
+            }
+          }, 200));
+        },
+        controller: 'multiSelectTreeCtrl'
+      };
+    }
+  ]);
 }());
 /*jshint indent: 2 */
 /*global angular: false */

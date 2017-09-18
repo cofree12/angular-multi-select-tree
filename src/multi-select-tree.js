@@ -208,7 +208,7 @@
    * sortableItem directive.
    */
   mainModule.directive('multiSelectTree',
-    function () {
+    ['_', function (_) {
       return {
         restrict: 'E',
         templateUrl: 'src/multi-select-tree.tpl.html',
@@ -290,7 +290,7 @@
             return isFiltered;
           }
 
-          scope.$watch('filterKeyword', function () {
+          scope.$watch('filterKeyword', _.throttle(function () {
             if (scope.filterKeyword !== undefined) {
               angular.forEach(scope.inputModel, function (item) {
                 var isFiltered = filterNode(item, scope.filterKeyword);
@@ -298,9 +298,9 @@
                 item.isExpanded = !isFiltered && scope.filterKeyword !== '';
               });
             }
-          });
+          }, 200));
         },
         controller: 'multiSelectTreeCtrl'
       };
-    });
+    }]);
 }());

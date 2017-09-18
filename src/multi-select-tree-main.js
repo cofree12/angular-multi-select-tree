@@ -27,5 +27,5 @@
 
 (function () {
   'use strict';
-  angular.module('multi-select-tree', []);
+  angular.module('multi-select-tree', ['underscore']);
 }());
