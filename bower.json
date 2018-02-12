@@ -3,7 +3,11 @@
   "name": "angular-multi-select-tree",
   "version": "0.1.0",
   "description": "A hierarchical (or tree) selection control for AngularJS",
-  "main": "index.js",
+  "main": [
+    "dist/angular-multi-select-tree-0.1.0.js",
+    "dist/angular-multi-select-tree-0.1.0.tpl.js",
+    "dist/angular-multi-select-tree-0.1.0.css"
+  ],
   "homepage": "https://github.com/a5hik/angular-multi-select-tree",
   "repository": {
     "type": "git",
